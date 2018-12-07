@@ -55,6 +55,7 @@ public class HuffProcessor {
 		out.close();
 	}
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
+		//After writing the tree, you'll need to read the file being compressed one more time. As shown above, the BitInputStream is reset, then read again to compress it
 		while(true) {
 			int bit = in.readBits(BITS_PER_WORD);
 			if (bit==-1) {
@@ -70,6 +71,7 @@ public class HuffProcessor {
 	}
 
 	private void writeHeader(HuffNode root, BitOutputStream out) {
+		//Writing the tree is similar to the code you wrote to read the tree when decompressing.
 		HuffNode current = root;
 		if(current== null) return;
 		if (current.myLeft==null && current.myRight==null) {
@@ -87,6 +89,7 @@ public class HuffProcessor {
 	}
 
 	private String[] makeCodingsFromTree(HuffNode root) {
+		//his method returns an array of Strings such that a[val] is the encoding of the 8-bit chunk val
 		String[] encodings = new String[ALPH_SIZE + 1];
 		codingHelper(root,"",encodings);
 		return encodings;
@@ -104,6 +107,7 @@ public class HuffProcessor {
 	}
 
 	private HuffNode makeTreeFromCounts(int[] counts) {
+		//You'll use a greedy algorithm and a priority queue of HuffNode objects to create the trie.
 		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
 
 
@@ -126,6 +130,7 @@ public class HuffProcessor {
 	}
 
 	private int[] readForCounts(BitInputStream in) {
+		//interior tree nodes are indicated by the single bit 0 and leaf nodes are indicated by the single bit 1
 		int[] arrayofints = new int[ALPH_SIZE + 1];
 		while(true) {
 			int y = in.readBits(BITS_PER_WORD);
@@ -148,6 +153,7 @@ public class HuffProcessor {
 	 *            Buffered bit stream writing to the output file.
 	 */
 	public void decompress(BitInputStream in, BitOutputStream out){
+		//decompress three already-compressed files provided in the assignment
 		int bits = in.readBits(BITS_PER_INT);
 		if (bits != HUFF_TREE) throw new HuffException("illegal header starts with " + bits); 
 		
@@ -157,6 +163,7 @@ public class HuffProcessor {
 	}
 
 	private void readCompressedBits(HuffNode root, BitInputStream in, BitOutputStream out) {
+		//Once you've read the bit sequence representing tree, you'll read the bits from the BitInputStream representing the compressed file one bit at a time, traversing the tree from the root and going left or right depending on whether you read a zero or a one
 		HuffNode current = root; 
 		   while (true) {
 		       int bits = in.readBits(1);
@@ -181,6 +188,7 @@ public class HuffProcessor {
 	}
 
 	private HuffNode readTreeHeader(BitInputStream in) {
+		//interior tree nodes are indicated by the single bit 0 and leaf nodes are indicated by the single bit 1.
 		int bit = in.readBits(1);
 		if (bit == -1) throw new HuffException("");
 		if (bit == 0) {
